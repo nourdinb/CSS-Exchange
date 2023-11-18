@@ -200,6 +200,7 @@ function Main {
             }
         }
 
+        $exportParamsPipeline = New-Object "System.Collections.Generic.List[object]"
         # foreach of the mailboxes we got data back from, loop through and collect the data we want.
         $cacheMailboxInformation.Keys | ForEach-Object {
             $mbxGuid = $_
@@ -218,13 +219,21 @@ function Main {
             # Display is depending on GroupMessages or not.
             $messagesForMailbox = Get-MailboxMessagesForCategory -MailboxInformation $mailboxInformation -Category $categories -GroupMessages $GroupMessages
 
-            if ($ExportData) {
-                Write-DataExport -MailboxInformation $mailboxInformation -Messages $messagesForMailbox
-            }
+            $exportParamsPipeline.Add(
+                [PSCustomObject]@{
+                    MailboxInformation = $mailboxInformation
+                    Messages           = $messagesForMailbox
+                }
+            )
 
             Write-Host
             Write-DashLineBox "----------------------------------------------------"
         }
+
+        if ($ExportData) {
+            $exportParamsPipeline | Write-DataExport
+        }
+
         return
     }
 

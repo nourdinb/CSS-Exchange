@@ -7,17 +7,20 @@
 function Write-DataExport {
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [object]$MailboxInformation,
 
+        [Parameter(ValueFromPipelineByPropertyName = $true)]
         [object[]]$Messages,
 
         [string]$UniqueId
     )
-    process {
+    begin {
         if ([string]::IsNullOrEmpty($UniqueId)) {
             $UniqueId = "$((Get-Date).ToString('yyMddhhmmss'))"
         }
+    }
+    process {
         $exportNameFormat = "$($MailboxInformation.MailboxGuid)-{0}-$UniqueId.{1}"
 
         try {
@@ -42,5 +45,8 @@ function Write-DataExport {
             Write-Host "Failed to export out the message data for $($MailboxInformation.MailboxGuid) to csv"
             Write-HostErrorInformation
         }
+    }
+    end {
+        Write-Host "Testing End"
     }
 }
